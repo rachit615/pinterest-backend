@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 
 import User from "../models/user.model.js";
+import { getUser } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
@@ -19,5 +20,7 @@ router.post("/create", async (req, res) => {
 
   return res.json({ message: "User created", user });
 });
+
+router.get("/:username", getUser);
 
 export default router;

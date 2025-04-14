@@ -1,9 +1,8 @@
 import express from "express";
+import { getUserBoards } from "../controllers/board.controller.js";
 
 const router = express.Router();
 
-router.get("/test", (req, res) => {
-  return res.json({ message: "test route is working" });
-});
+router.get("/:userId", getUserBoards);
 
 export default router;

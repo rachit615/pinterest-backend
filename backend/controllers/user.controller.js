@@ -4,13 +4,40 @@ import Follow from "../models/follow.model.js";
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
 export const getUser = async (req, res) => {
   const userName = req.params.username;
   const user = await User.findOne({ userName: userName });
 
+  const followers = await Follow.countDocuments({ following: user._id });
+  const following = await Follow.countDocuments({ follower: user._id });
   const { password, ...detailsWithoutPassword } = user.toObject();
 
-  return res.status(200).json(detailsWithoutPassword);
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(200).json({
+      ...detailsWithoutPassword,
+      followersCount: followers,
+      followingCount: following,
+      isFollowing: false,
+    });
+  } else {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (!err) {
+        const isExists = await Follow.exists({
+          follower: decoded.userId,
+          following: user._id,
+        });
+
+        return res.status(200).json({
+          ...detailsWithoutPassword,
+          followersCount: followers,
+          followingCount: following,
+          isFollowing: isExists ? true : false,
+        });
+      }
+    });
+  }
 };
 
 export const registerUser = async (req, res) => {

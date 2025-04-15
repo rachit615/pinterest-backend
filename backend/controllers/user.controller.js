@@ -1,7 +1,7 @@
 import { message } from "antd";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-
+import jwt from "jsonwebtoken";
 export const getUser = async (req, res) => {
   const userName = req.params.username;
   const user = await User.findOne({ userName: userName });
@@ -52,6 +52,15 @@ export const loginUser = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
     const { password: _, ...detailsWithoutPassword } = user.toObject();
 
     return res.status(200).json(detailsWithoutPassword);

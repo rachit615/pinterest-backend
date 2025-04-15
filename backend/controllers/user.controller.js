@@ -1,5 +1,7 @@
 import { message } from "antd";
 import User from "../models/user.model.js";
+import Follow from "../models/follow.model.js";
+
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 export const getUser = async (req, res) => {
@@ -76,4 +78,32 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const followUser = async (req, res) => {
+  const userName = req.params.userName;
+  const user = await User.findOne({ userName: userName });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const userId = user._id;
+  const loggedInUserId = req.userId;
+
+  const isFollowing = await Follow.exists({
+    follower: loggedInUserId,
+    following: userId,
+  });
+
+  if (!isFollowing) {
+    await Follow.create({
+      follower: loggedInUserId,
+      following: userId,
+    });
+    return res.status(200).json({ message: "Followed successfully" });
+  } else {
+    await Follow.deleteOne({ follower: loggedInUserId, following: userId });
+    return res.status(200).json({ message: "Unfollowed successfully" });
+  }
 };

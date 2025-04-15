@@ -53,6 +53,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // token is made with {userId}
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
     res.cookie("token", token, {

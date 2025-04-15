@@ -6,10 +6,12 @@ import boardRouter from "./routes/board.route.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./utils/connectdb.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
